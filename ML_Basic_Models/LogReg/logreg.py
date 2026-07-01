@@ -1,5 +1,4 @@
 import numpy as np
-import math
 
 class LogReg:
     def __init__(self, lr=0.001,it = 1000):

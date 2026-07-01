@@ -1,9 +1,10 @@
-from Agent import Agent
-from Game import Game
-from Frontend import pva
+from agent import Agent
+from game import Game
+from frontend import pva
 from threading import Lock, Thread
 import time
-from MiniMax import MiniMax
+from miniMax import MiniMax
+from utils import save_agent
 
 
 def selfplay_thread(agent, eps_min, eps_decay, stats_lock, val_freq):
@@ -40,8 +41,9 @@ def selfplay_thread(agent, eps_min, eps_decay, stats_lock, val_freq):
         
 
 
-def train_selfplay(agent, episodes=10000, eps_min=0.02, num_workers=8, val_freq=10000):
+def train_selfplay(agent, episodes=10_000, eps_min=0.02, num_workers=8, val_freq=10_000, save_freq=100_000):
     eps_decay = eps_min ** (1/(episodes*(2/3)))
+    next_save = save_freq
     global stats
     stats = [0,0,0]
     stats_lock = Lock()
@@ -79,6 +81,9 @@ def train_selfplay(agent, episodes=10000, eps_min=0.02, num_workers=8, val_freq=
         agent.eps = eps
         print(f'Passed time: {time.time() - start:.2f}')
 
+        if episode >= next_save:
+            save_agent(agent)
+            next_save += save_freq
         if episode >= episodes:
             print('Finished training!')
             break

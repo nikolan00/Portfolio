@@ -19,4 +19,13 @@ pip install -r requirements.txt
 
 
 ## Usage
-Execute cells in Main.ipynb
+Start model training by running the following commands:
+```shell
+cd src
+python train.py
+```
+
+Play against the latest checkpoint by running the following command:
+```shell
+python play_agent.py
+```

@@ -1,5 +1,5 @@
 import numpy as np
-import Utils
+import utils
 
 class Game:
     def __init__(self):
@@ -9,11 +9,11 @@ class Game:
 
 
     def check_win(self):
-        return Utils.check_win(self.board)
+        return utils.check_win(self.board)
 
 
     def print_board(self):
-        return Utils.print_board(self.board)
+        return utils.print_board(self.board)
     
     
     def make_move(self, col):

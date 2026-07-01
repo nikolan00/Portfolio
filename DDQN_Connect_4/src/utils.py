@@ -1,5 +1,9 @@
+import pickle
+from threading import Lock
+import os
 import numpy as np
 import torch
+
 
 def check_win(board):
     ROWS, COLS = board.shape
@@ -104,3 +108,18 @@ def np_to_hash(arr):
 def board_to_sym_hash(board):
     board,_ = map_symmetrical(board)
     return np_to_hash(board)
+
+def save_agent(agent):
+    agent.memory_lock = ""
+    agent.eps_lock = ""
+    agent.train_lock = ""
+
+    os.makedirs("trained_agents", exist_ok=True)
+    save_location = f'../trained_agents/{agent.training_episodes // 1000}k_episodes.pkl'
+    with open(save_location, 'wb') as f:
+        pickle.dump(agent, f)
+    print(f'Saved checkpoint under trained_agents/{agent.training_episodes // 1000}k_episodes.pkl!')
+
+    agent.memory_lock = Lock()
+    agent.eps_lock = Lock()
+    agent.train_lock = Lock()

@@ -1,11 +1,11 @@
 import random
 import numpy as np
-import Utils
 import torch
 import torch.nn as nn
-from NN import CNN
+from nn import CNN
 from collections import deque
 from threading import Lock
+import utils
 
 
 class Agent:
@@ -66,7 +66,7 @@ class Agent:
             with torch.no_grad():
                 q_vals = self.policy_net.forward(input)
                 for i,board in enumerate(boards_batch):
-                    illegal_moves = Utils.get_illegal_moves(board)
+                    illegal_moves = utils.get_illegal_moves(board)
                     q_vals[i,illegal_moves] = -9999
         else:
             q_vals = self.policy_net.forward(input)
@@ -74,7 +74,7 @@ class Agent:
     
 
     def make_move(self, game):
-        legal_moves = Utils.get_legal_moves(game.board)
+        legal_moves = utils.get_legal_moves(game.board)
         assert len(legal_moves) > 0
         if random.random() < self.eps:
             move = random.randint(0, 6)
@@ -82,9 +82,9 @@ class Agent:
                 move = random.randint(0, 6)
         else:
             # Policy move
-            sym_board, flipped = Utils.map_symmetrical(game.board)
+            sym_board, flipped = utils.map_symmetrical(game.board)
             q = self.get_Q([sym_board], [self.player])[0]
-            move = Utils.pick_random_argmax(q)
+            move = utils.pick_random_argmax(q)
             if flipped:
                 move = 6-move
             if self.verbose:
@@ -96,19 +96,19 @@ class Agent:
     
     def add_to_memory(self, state_actions):
         for board,action in state_actions:
-            board, flipped = Utils.map_symmetrical(board)
+            board, flipped = utils.map_symmetrical(board)
             if flipped:
                 action = 6-action
             player = 1 if np.sum(board.flatten()) == 0 else -1
             next_board = board.copy()
             # Punish illegal moves
-            if action not in Utils.get_legal_moves(board):
+            if action not in utils.get_legal_moves(board):
                 reward = -player
                 is_final = True
             else:
-                next_board = Utils.make_move(next_board, action, player)
-                reward = Utils.check_win(next_board) * player
-                is_final = Utils.check_win(next_board) != 0 or 0 not in next_board
+                next_board = utils.make_move(next_board, action, player)
+                reward = utils.check_win(next_board) * player
+                is_final = utils.check_win(next_board) != 0 or 0 not in next_board
             memory_entry = {'state': board.copy(), 'next_state': next_board, 'reward': reward, 'is_final': is_final, 'player': player, 'action': action}
             with self.memory_lock:
                 self.replay_memory.append(memory_entry)
@@ -133,7 +133,7 @@ class Agent:
         q_next = self.get_Q(next_state_batch, enemy_player_batch)                
         targ_q_next = self.get_target_Q(next_state_batch, enemy_player_batch, is_final_batch)
 
-        optim_answers = Utils.pick_random_argmax(q_next)
+        optim_answers = utils.pick_random_argmax(q_next)
         batch_idx = torch.arange(targ_q_next.shape[0], device=targ_q_next.device)
         optim_future_qs = -targ_q_next[batch_idx, optim_answers] # "minus" since these are Q-vals for the opponents move
         q_target = reward_batch + self.gamma * optim_future_qs
@@ -144,15 +144,6 @@ class Agent:
             loss.backward()
             self.optimizer.step()
             self.training_episodes += 1
-        
-        ### DEBUG
-        # if random.randint(0,100) == 1:
-        #     for i,kv in enumerate(batch):
-        #         sample = kv[1]
-        #         if sample['player'] == -1 and np.sum(next_state_batch[i]==0) == 1:
-        #             Utils.print_board(state_batch[i])
-        #             print("act,qpred,qtgt", action_batch[i], q_pred[i].item(), q_target[i].item(), "move, q_eval:", optim_answers[i].item(), optim_future_qs[i].item())
-    
 
     def update_target(self):
         self.target_net.load_state_dict(self.policy_net.state_dict())

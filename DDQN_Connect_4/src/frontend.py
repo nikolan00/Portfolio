@@ -1,8 +1,9 @@
 import pygame
 import sys
-from Agent import Agent
-from Game import Game
-import Utils
+from agent import Agent
+from game import Game
+import utils
+
 
 WIDTH, HEIGHT = 350, 300
 LINE_WIDTH = 5
@@ -180,7 +181,7 @@ def pva(agent):
                 if event.type == pygame.MOUSEBUTTONDOWN and not game_over:
                     x, y = event.pos
                     move = x // SQUARE_SIZE
-                    legal_moves = Utils.get_legal_moves(game.board)
+                    legal_moves = utils.get_legal_moves(game.board)
                     
                     if move in legal_moves:
                         game.make_move(move)

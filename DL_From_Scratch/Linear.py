@@ -1,6 +1,6 @@
 # y = b +  Wx
 import numpy as np
-from Layer import Layer
+from layer import Layer
 
 class LinearLayer(Layer):
 

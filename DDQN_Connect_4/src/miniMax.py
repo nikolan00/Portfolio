@@ -1,6 +1,6 @@
-import Utils
 import numpy as np
 import time
+import utils
 
 
 class MiniMax:
@@ -11,7 +11,7 @@ class MiniMax:
 
     
     def make_move(self, game):
-        legal_moves = Utils.get_legal_moves(game.board)
+        legal_moves = utils.get_legal_moves(game.board)
         assert len(legal_moves) > 0
         evals = []
         self.evaluated_pos = {}
@@ -33,19 +33,19 @@ class MiniMax:
     
     def miniMax(self, board, depth, alpha, beta, player, last_move):
         d_board = embed_depth(board, depth)
-        if Utils.board_to_sym_hash(d_board) in self.evaluated_pos:
-            return self.evaluated_pos[Utils.board_to_sym_hash(d_board)]
+        if utils.board_to_sym_hash(d_board) in self.evaluated_pos:
+            return self.evaluated_pos[utils.board_to_sym_hash(d_board)]
         gameOver =  0 not in board or check_win_at(board, last_move[0], last_move[1], -player) != 0
 
         if depth == 0 or gameOver:
             eval = self.evaluate(board, player, depth, last_move)
-            self.evaluated_pos[Utils.board_to_sym_hash(d_board)] = eval
+            self.evaluated_pos[utils.board_to_sym_hash(d_board)] = eval
             return eval
 
         maxEval = -999999.0
         minEval = 999999.0
 
-        for i in Utils.get_legal_moves(board):
+        for i in utils.get_legal_moves(board):
             # clone stacks
             board_copy = board.copy()
 
@@ -76,15 +76,15 @@ class MiniMax:
             eval = maxEval
         else:
             eval = minEval
-        self.evaluated_pos[Utils.board_to_sym_hash(d_board)] = eval
+        self.evaluated_pos[utils.board_to_sym_hash(d_board)] = eval
         return eval
 
     
 
     def evaluate(self, board, player, depth, last_move):
         d_board = embed_depth(board, depth)
-        if Utils.board_to_sym_hash(d_board) in self.evaluated_pos:
-            return self.evaluated_pos[Utils.board_to_sym_hash(d_board)]
+        if utils.board_to_sym_hash(d_board) in self.evaluated_pos:
+            return self.evaluated_pos[utils.board_to_sym_hash(d_board)]
         # Check if game is already over, in that case the enemy player won
         p_winner = check_win_at(board, last_move[0], last_move[1], -player)
         if p_winner:
@@ -123,7 +123,7 @@ def check_win_at(board, row, col, player):
 
 
 def get_winning_moves(board, player):
-    legal_moves = Utils.get_legal_moves(board)
+    legal_moves = utils.get_legal_moves(board)
     winning_moves = []
 
     for col in legal_moves:
